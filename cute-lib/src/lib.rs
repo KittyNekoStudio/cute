@@ -164,20 +164,40 @@ mod tests {
         assert_eq!(Number::new("   5"), ("", Number(5)));
     }
     #[test]
-    fn test_buffer_push() {
+    fn buffer_push() {
         let mut buffer = Buffer::new();
         buffer.push("1 + 3\n3 * 3\n");
 
         assert_eq!(buffer.0, vec!["1 + 3", "3 * 3"]);
     }
     #[test]
-    fn test_string_from_file() {
+    fn string_from_file() {
         let mut file = File::open("src/test.cute").unwrap();
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
         let mut buffer = Buffer::new();
         buffer.push(&contents);
 
-        assert_eq!(buffer.0, vec!["1 + 3", "3 * 3"]);
+        assert_eq!(buffer.0, vec!["1 + 3"]);
+    }
+    #[test]
+    fn expression_from_file() {
+        let mut file = File::open("src/test.cute").unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        let mut buffer = Buffer::new();
+        buffer.push(&contents);
+
+        assert_eq!(
+            Expression::new(&buffer.0[0]),
+            (
+                "",
+                Expression {
+                    lhs: Number(1),
+                    op: Operation::Addition,
+                    rhs: Number(3)
+                }
+            )
+        );
     }
 }
