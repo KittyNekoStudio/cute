@@ -1,3 +1,8 @@
+use std::fs::File;
+use std::io::prelude::*;
+
+const VEC_STARTING_SIZE: usize = 64000;
+
 #[derive(Debug, PartialEq)]
 struct Number(i32);
 
@@ -21,6 +26,9 @@ struct Expression {
     rhs: Number,
 }
 
+#[derive(Debug, PartialEq, Clone)]
+struct Buffer(Vec<String>);
+
 impl Expression {
     pub fn new(string: &str) -> (&str, Self) {
         let (string, lhs) = Number::new(string);
@@ -41,7 +49,7 @@ impl Expression {
 impl Number {
     pub fn new(string: &str) -> (&str, Self) {
         let (string, number) = extract_number(string);
-        (string, Number(number.parse().unwrap()))
+        (string, Self(number.parse().unwrap()))
     }
 }
 
@@ -49,6 +57,18 @@ impl Operation {
     pub fn new(string: &str) -> (&str, Self) {
         let (string, op) = extract_operation(string);
         (string, op)
+    }
+}
+
+impl Buffer {
+    pub fn new() -> Self {
+        // TODO! change vec to somthing more efficient
+        Self(Vec::with_capacity(VEC_STARTING_SIZE))
+    }
+    pub fn push(&mut self, string: &str) {
+        for str in string.lines() {
+            self.0.push(str.to_string())
+        }
     }
 }
 
@@ -142,5 +162,22 @@ mod tests {
     #[test]
     fn parse_whitespace() {
         assert_eq!(Number::new("   5"), ("", Number(5)));
+    }
+    #[test]
+    fn test_buffer_push() {
+        let mut buffer = Buffer::new();
+        buffer.push("1 + 3\n3 * 3\n");
+
+        assert_eq!(buffer.0, vec!["1 + 3", "3 * 3"]);
+    }
+    #[test]
+    fn test_string_from_file() {
+        let mut file = File::open("src/test.cute").unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        let mut buffer = Buffer::new();
+        buffer.push(&contents);
+
+        assert_eq!(buffer.0, vec!["1 + 3", "3 * 3"]);
     }
 }
