@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
 
 const VEC_STARTING_SIZE: usize = 64000;
@@ -14,6 +14,7 @@ enum Operation {
     Division,
 }
 
+// TODO! find a way to use value
 #[derive(Debug, PartialEq)]
 enum Value {
     Number(Number),
@@ -27,7 +28,7 @@ struct Expression {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct Buffer(Vec<String>);
+pub struct Buffer(Vec<String>);
 
 impl Expression {
     pub fn new(string: &str) -> (&str, Self) {
@@ -35,14 +36,16 @@ impl Expression {
         let (string, op) = Operation::new(string);
         let (string, rhs) = Number::new(string);
 
-        (
-            string,
-            Self {
-                rhs: rhs,
-                op: op,
-                lhs: lhs,
-            },
-        )
+        (string, Self { rhs, op, lhs })
+    }
+    pub fn eval(&self) -> Value {
+        match self.op {
+            // TODO! clean up the 0 indexing into number type
+            Operation::Addition => Value::Number(Number(self.lhs.0 + self.rhs.0)),
+            Operation::Subtraction => Value::Number(Number(self.lhs.0 - self.rhs.0)),
+            Operation::Multiplication => Value::Number(Number(self.lhs.0 * self.rhs.0)),
+            Operation::Division => Value::Number(Number(self.lhs.0 / self.rhs.0)),
+        }
     }
 }
 
@@ -121,6 +124,115 @@ fn extract_whitespace(string: &str) -> (&str, &str) {
     (remainder, whitespace)
 }
 
+fn convert_strings_to_expressions(buffer: Buffer) -> Vec<Expression> {
+    let mut vec = Vec::new();
+    for v in buffer.0 {
+        vec.push(Expression::new(&v).1);
+    }
+    vec
+}
+
+fn read_to_file(path: &str, buffer: &mut Buffer) {
+    let mut file = File::open(path).unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    buffer.push(&contents);
+}
+
+pub fn write_to_file(path: &str, buffer: &mut Buffer) {
+    read_to_file(path, buffer);
+    // TODO! remove having to clone buffer
+    let expressions = convert_strings_to_expressions(buffer.to_owned());
+    let dot = path
+        .char_indices()
+        .find_map(|(index, char)| {
+            if char == '.' {
+                return Some(index);
+            } else {
+                return None;
+            }
+        })
+        .unwrap_or_else(|| path.len());
+
+    let path = &path[..dot];
+
+    let mut file = OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(format!("{path}.asm"))
+        .unwrap();
+    // TODO! add comments to asm
+    write!(file, "    global print_uint32\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "print_uint32:\n").unwrap();
+    write!(file, "    mov rax, rdi\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "    mov  ecx, 0xa\n").unwrap();
+    write!(file, "    push rcx\n").unwrap();
+    write!(file, "    mov  rsi, rsp\n").unwrap();
+    write!(file, "    sub  rsp, 16\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "    .toascii_digit:\n").unwrap();
+    write!(file, "    xor  edx, edx\n").unwrap();
+    // TODO! div is slow
+    write!(file, "    div  ecx\n").unwrap();
+    write!(file, "    add  edx, '0'\n").unwrap();
+    write!(file, "    dec  rsi\n").unwrap();
+    write!(file, "    mov [rsi], dl\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "    test rax, rax\n").unwrap();
+    write!(file, "    jnz  .toascii_digit\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "    mov  rax, 1\n").unwrap();
+    write!(file, "    mov  rdi, 1\n").unwrap();
+    write!(file, "    lea  edx, [rsp+16 + 1]\n").unwrap();
+    write!(file, "    sub  edx, esi\n").unwrap();
+    write!(file, "    syscall\n").unwrap();
+    write!(file, "    add  rsp, 24\n").unwrap();
+    write!(file, "    ret\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "section .text\n").unwrap();
+    write!(file, "    global _start\n").unwrap();
+    write!(file, "\n").unwrap();
+    write!(file, "_start:\n").unwrap();
+
+    for expr in expressions {
+        match expr.op {
+            Operation::Addition => {
+                let lhs = expr.lhs.0;
+                let rhs = expr.rhs.0;
+                write!(file, "    mov  rdi, {lhs}\n").unwrap();
+                write!(file, "    add  rdi, {rhs}\n").unwrap();
+                write!(file, "    call print_uint32\n").unwrap();
+            }
+            Operation::Subtraction => {
+                let lhs = expr.lhs.0;
+                let rhs = expr.rhs.0;
+                write!(file, "    mov  rdi, {lhs}\n").unwrap();
+                write!(file, "    sub  rdi, {rhs}\n").unwrap();
+                write!(file, "    call print_uint32\n").unwrap();
+            }
+            Operation::Multiplication => {
+                let lhs = expr.lhs.0;
+                let rhs = expr.rhs.0;
+                write!(file, "    mov  rax, {lhs}\n").unwrap();
+                write!(file, "    mov  rdx, {rhs}\n").unwrap();
+                write!(file, "    mul  rdx\n").unwrap();
+                write!(file, "    mov  rdi, rax \n").unwrap();
+                write!(file, "    call print_uint32\n").unwrap();
+            }
+            Operation::Division => {
+                assert!(false, "Division not implemented")
+            }
+        }
+    }
+    write!(file, "    mov  rax, 60\n").unwrap();
+    write!(file, "    mov  rdi, 0\n").unwrap();
+    write!(file, "    syscall\n").unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -164,6 +276,10 @@ mod tests {
         assert_eq!(Number::new("   5"), ("", Number(5)));
     }
     #[test]
+    fn evaluate_number() {
+        assert_eq!(Expression::new("4 / 2").1.eval(), Value::Number(Number(2)));
+    }
+    #[test]
     fn buffer_push() {
         let mut buffer = Buffer::new();
         buffer.push("1 + 3\n3 * 3\n");
@@ -172,32 +288,30 @@ mod tests {
     }
     #[test]
     fn string_from_file() {
-        let mut file = File::open("src/test.cute").unwrap();
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).unwrap();
         let mut buffer = Buffer::new();
-        buffer.push(&contents);
+        read_to_file("tests/test-string.cute", &mut buffer);
 
         assert_eq!(buffer.0, vec!["1 + 3"]);
     }
     #[test]
     fn expression_from_file() {
-        let mut file = File::open("src/test.cute").unwrap();
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).unwrap();
         let mut buffer = Buffer::new();
-        buffer.push(&contents);
-
+        read_to_file("tests/test-expression.cute", &mut buffer);
         assert_eq!(
             Expression::new(&buffer.0[0]),
             (
                 "",
                 Expression {
-                    lhs: Number(1),
-                    op: Operation::Addition,
-                    rhs: Number(3)
+                    lhs: Number(4),
+                    op: Operation::Subtraction,
+                    rhs: Number(2)
                 }
             )
         );
+    }
+    #[test]
+    fn test_write_to_file() {
+        let mut buffer = Buffer::new();
+        write_to_file("tests/test.cute", &mut buffer);
     }
 }

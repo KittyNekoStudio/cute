@@ -1,3 +1,5 @@
+use cute_lib::*;
 fn main() {
-    println!("{}", 7 % 3);
+    let mut buffer = Buffer::new();
+    write_to_file("foo.cute", &mut buffer);
 }
