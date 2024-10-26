@@ -1,4 +1,4 @@
-use crate::{extract_until_whitespace, extract_whitespace};
+use crate::utils::{extract_until_whitespace, extract_whitespace};
 
 #[derive(Debug, PartialEq)]
 pub enum TokenKind {
