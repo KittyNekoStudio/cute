@@ -1,17 +1,18 @@
-use crate::Buffer;
 use crate::utils::*;
 use crate::types::Operation;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
 
-pub fn read_to_file(path: &str, buffer: &mut Buffer) {
+pub fn read_to_file(path: &str, buffer: &mut Vec<String>) {
     let mut file = File::open(path).unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
-    buffer.push(&contents);
+    for string in contents.lines() {
+    buffer.push(string.to_string());
+    }
 }
 
-pub fn write_to_file(path: &str, buffer: &mut Buffer) {
+pub fn write_to_file(path: &str, buffer: &mut Vec<String>) {
     read_to_file(path, buffer);
     // TODO! remove having to clone buffer
     let expressions = convert_strings_to_expressions(buffer.to_owned());
@@ -113,17 +114,17 @@ mod tests {
 
     #[test]
     fn string_from_file() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Vec::new();
         read_to_file("tests/test-string.cute", &mut buffer);
 
-        assert_eq!(buffer.0, vec!["1 + 3"]);
+        assert_eq!(buffer, vec!["1 + 3"]);
     }
     #[test]
     fn expression_from_file() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Vec::new();
         read_to_file("tests/test-expression.cute", &mut buffer);
         assert_eq!(
-            Expression::new(&buffer.0[0]),
+            Expression::new(&buffer[0]),
             (
                 "",
                 Expression {
@@ -136,7 +137,7 @@ mod tests {
     }
     #[test]
     fn test_write_to_file() {
-        let mut buffer = Buffer::new();
+        let mut buffer = Vec::new();
         write_to_file("tests/test.cute", &mut buffer);
     }
 }

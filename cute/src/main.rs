@@ -1,5 +1,8 @@
-use cute_lib::*;
+use cute_lib::file::read_to_file;
+use cute_lib::token::tokenize;
 fn main() {
-    let mut buffer = Buffer::new();
-    write_to_file("foo.cute", &mut buffer);
+    let mut source = Vec::new();
+    read_to_file("foo.cute", &mut source);
+    let tokens = tokenize(source);
+    println!("{tokens:?}");
 }

@@ -1,5 +1,4 @@
 use crate::expression::Expression;
-use crate::Buffer;
 use crate::types::Operation;
 
 fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
@@ -57,9 +56,9 @@ pub fn extract_name(string: &str) -> Result<(&str, &str), String> {
     Ok(extract(|char| !char.is_whitespace(), string))
 }
 
-pub fn convert_strings_to_expressions(buffer: Buffer) -> Vec<Expression> {
+pub fn convert_strings_to_expressions(buffer: Vec<String>) -> Vec<Expression> {
     let mut vec = Vec::new();
-    for v in buffer.0 {
+    for v in buffer {
         vec.push(Expression::new(&v).1);
     }
     vec

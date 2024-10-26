@@ -6,6 +6,10 @@ pub enum TokenKind {
     Plus,
     Dash,
     Star,
+    Let,
+    Binding,
+    Assignment,
+    EOF,
 }
 
 #[derive(Debug, PartialEq)]
@@ -18,7 +22,7 @@ pub struct Token {
 pub struct Lexer {
     tokens: Vec<Token>,
     source: Vec<String>,
-    loc: i32,
+    loc: (i32, i32),
 }
 
 impl Lexer {
@@ -26,15 +30,18 @@ impl Lexer {
         Self {
             tokens: Vec::new(),
             source,
-            loc: 0,
+            loc: (0, 0),
         }
     }
     fn push_token(&mut self, token: Token) {
         self.tokens.push(token);
     }
+    fn previous(&mut self) -> &TokenKind {
+        &self.tokens.last().unwrap().kind
+    }
 }
 
-fn tokenize(source: Vec<String>) -> Vec<Token> {
+pub fn tokenize(source: Vec<String>) -> Vec<Token> {
     let mut lexer = Lexer::new(source.clone());
     for mut str in source {
         while !str.is_empty() {
@@ -48,10 +55,19 @@ fn tokenize(source: Vec<String>) -> Vec<Token> {
                 lexer.push_token(Token::new(TokenKind::Dash, value));
             } else if value == "*" {
                 lexer.push_token(Token::new(TokenKind::Star, value));
+            } else if value == "let" {
+                lexer.push_token(Token::new(TokenKind::Let, value));
+            } else if lexer.previous() == &TokenKind::Let {
+                lexer.push_token(Token::new(TokenKind::Binding, value));
+            } else if value == "=" {
+                lexer.push_token(Token::new(TokenKind::Assignment, value));
             }
             str = string.to_string();
+            lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
         }
+        lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
     }
+    lexer.push_token(Token::new(TokenKind::EOF, "EOF"));
     lexer.tokens
 }
 
@@ -85,7 +101,7 @@ mod tests {
             Lexer {
                 tokens: vec![],
                 source: vec![],
-                loc: 0
+                loc: (0, 0)
             }
         );
     }
@@ -96,7 +112,7 @@ mod tests {
             Lexer {
                 tokens: vec![],
                 source: vec!["9".to_string(), "30 + 2".to_string()],
-                loc: 0
+                loc: (0, 0)
             }
         );
     }
@@ -107,10 +123,16 @@ mod tests {
         let token = tokenize(source);
         assert_eq!(
             token,
-            vec![Token {
-                kind: TokenKind::Number,
-                value: "3209".to_string()
-            }]
+            vec![
+                Token {
+                    kind: TokenKind::Number,
+                    value: "3209".to_string()
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    value: "EOF".to_string()
+                }
+            ]
         );
     }
     #[test]
@@ -119,10 +141,16 @@ mod tests {
         let token = tokenize(source);
         assert_eq!(
             token,
-            vec![Token {
-                kind: TokenKind::Plus,
-                value: "+".to_string()
-            }]
+            vec![
+                Token {
+                    kind: TokenKind::Plus,
+                    value: "+".to_string()
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    value: "EOF".to_string()
+                }
+            ]
         );
     }
     #[test]
@@ -131,10 +159,16 @@ mod tests {
         let token = tokenize(source);
         assert_eq!(
             token,
-            vec![Token {
-                kind: TokenKind::Dash,
-                value: "-".to_string()
-            }]
+            vec![
+                Token {
+                    kind: TokenKind::Dash,
+                    value: "-".to_string()
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    value: "EOF".to_string()
+                }
+            ]
         );
     }
     #[test]
@@ -143,10 +177,16 @@ mod tests {
         let token = tokenize(source);
         assert_eq!(
             token,
-            vec![Token {
-                kind: TokenKind::Star,
-                value: "*".to_string()
-            }]
+            vec![
+                Token {
+                    kind: TokenKind::Star,
+                    value: "*".to_string()
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    value: "EOF".to_string()
+                }
+            ]
         );
     }
     #[test]
@@ -197,6 +237,10 @@ mod tests {
                     kind: TokenKind::Number,
                     value: "3".to_string()
                 },
+                Token {
+                    kind: TokenKind::EOF,
+                    value: "EOF".to_string()
+                }
             ]
         );
     }
