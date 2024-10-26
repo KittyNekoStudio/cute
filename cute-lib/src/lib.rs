@@ -1,9 +1,10 @@
+use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
 
 const VEC_STARTING_SIZE: usize = 64000;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 struct Number(i32);
 
 #[derive(Debug, PartialEq)]
@@ -15,7 +16,7 @@ enum Operation {
 }
 
 // TODO! find a way to use value
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum Value {
     Number(Number),
 }
@@ -30,10 +31,15 @@ struct Expression {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Buffer(Vec<String>);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 struct Binding {
     name: String,
     value: Value,
+}
+
+#[derive(Debug, PartialEq)]
+struct Enviroment {
+    env: HashMap<String, Value>,
 }
 
 impl Expression {
@@ -57,7 +63,7 @@ impl Expression {
 
 impl Number {
     pub fn new(string: &str) -> (&str, Self) {
-        let (string, _ ) = extract_whitespace(string);
+        let (string, _) = extract_whitespace(string);
         let (string, number) = extract_number(string);
         (string, Self(number.parse().unwrap()))
     }
@@ -83,9 +89,40 @@ impl Buffer {
 }
 
 impl Binding {
-    //pub fn new(string: &str) -> (&str, Self) {
+    pub fn new(string: &str) -> Result<(&str, Self), String> {
+        let string = extract_keyword(string, "let")?;
+        let (string, _) = extract_whitespace(string);
 
-    // }
+        let (string, name) = extract_name(string)?;
+        let (string, _) = extract_whitespace(string);
+
+        println!("{string}");
+        let string = extract_keyword(string, "=")?;
+        let (string, _) = extract_whitespace(string);
+
+        let (string, expr) = Expression::new(string);
+        Ok((
+            string,
+            Self {
+                name: name.to_string(),
+                value: expr.eval(),
+            },
+        ))
+    }
+}
+
+impl Enviroment {
+    pub fn new() -> Self {
+        Self {
+            env: HashMap::new(),
+        }
+    }
+    fn get_binding(&self, key: &str) -> Value {
+        self.env.get(key).cloned().unwrap()
+    }
+    fn store_binding(&mut self, binding: Binding) {
+        self.env.insert(binding.name.to_string(), binding.value);
+    }
 }
 
 fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
@@ -104,6 +141,7 @@ fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
     let remainder = &string[extracted_end..];
     (remainder, extracted)
 }
+
 fn extract_operation(string: &str) -> (&str, Operation) {
     let (string, _) = extract_whitespace(string);
     let op = match &string[0..1] {
@@ -124,6 +162,18 @@ fn extract_number(string: &str) -> (&str, &str) {
 
 fn extract_whitespace(string: &str) -> (&str, &str) {
     extract(|char| char.is_whitespace(), string)
+}
+
+fn extract_keyword<'a>(string: &'a str, starting_string: &str) -> Result<&'a str, String> {
+    if string.starts_with(starting_string) {
+        return Ok(&string[starting_string.len()..]);
+    } else {
+        return Err(format! {"Error extracting keyword"});
+    }
+}
+
+fn extract_name(string: &str) -> Result<(&str, &str), String> {
+    Ok(extract(|char| !char.is_whitespace(), string))
 }
 
 fn convert_strings_to_expressions(buffer: Buffer) -> Vec<Expression> {
@@ -277,16 +327,26 @@ mod tests {
     fn parse_whitespace() {
         assert_eq!(Number::new("   5"), ("", Number(5)));
     }
-    /* #[test]
-    fn parse_binding_value() {
+    #[test]
+    fn parse_binding_value_from_expression() {
         assert_eq!(
-            Binding::new("let i = 10"),
+            Binding::new("let i = 1 + 8").unwrap().1,
             Binding {
-                name: "a".to_string(),
+                name: "i".to_string(),
+                value: Value::Number(Number(9))
+            }
+        );
+    }
+    /*#[test]
+    fn parse_binding_value_from_int() {
+        assert_eq!(
+            Binding::new("let i = 10").unwrap().1,
+            Binding {
+                name: "i".to_string(),
                 value: Value::Number(Number(10))
             }
         );
-         }*/
+    }*/
     #[test]
     fn evaluate_number() {
         assert_eq!(Expression::new("4 / 2").1.eval(), Value::Number(Number(2)));
@@ -325,5 +385,15 @@ mod tests {
     fn test_write_to_file() {
         let mut buffer = Buffer::new();
         write_to_file("tests/test.cute", &mut buffer);
+    }
+    #[test]
+    fn evaluate_binded_value() {
+        let mut enviroment = Enviroment::new();
+        let binding = Binding::new("let i = 10 + 3").unwrap().1;
+        enviroment.store_binding(binding.clone());
+        assert_eq!(
+            enviroment.get_binding(&binding.name),
+            Value::Number(Number(13))
+        );
     }
 }
