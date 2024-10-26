@@ -30,6 +30,12 @@ struct Expression {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Buffer(Vec<String>);
 
+#[derive(Debug, PartialEq)]
+struct Binding {
+    name: String,
+    value: Value,
+}
+
 impl Expression {
     pub fn new(string: &str) -> (&str, Self) {
         let (string, lhs) = Number::new(string);
@@ -51,6 +57,7 @@ impl Expression {
 
 impl Number {
     pub fn new(string: &str) -> (&str, Self) {
+        let (string, _ ) = extract_whitespace(string);
         let (string, number) = extract_number(string);
         (string, Self(number.parse().unwrap()))
     }
@@ -75,6 +82,28 @@ impl Buffer {
     }
 }
 
+impl Binding {
+    //pub fn new(string: &str) -> (&str, Self) {
+
+    // }
+}
+
+fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
+    let extracted_end = string
+        .char_indices()
+        .find_map(|(index, char)| {
+            if accept(char) {
+                return None;
+            } else {
+                return Some(index);
+            }
+        })
+        .unwrap_or(string.len());
+
+    let extracted = &string[..extracted_end];
+    let remainder = &string[extracted_end..];
+    (remainder, extracted)
+}
 fn extract_operation(string: &str) -> (&str, Operation) {
     let (string, _) = extract_whitespace(string);
     let op = match &string[0..1] {
@@ -90,38 +119,11 @@ fn extract_operation(string: &str) -> (&str, Operation) {
 }
 
 fn extract_number(string: &str) -> (&str, &str) {
-    let (string, _) = extract_whitespace(string);
-    let number_end = string
-        .char_indices()
-        .find_map(|(index, char)| {
-            if char.is_ascii_digit() {
-                return None;
-            } else {
-                return Some(index);
-            }
-        })
-        .unwrap_or_else(|| string.len());
-
-    let number = &string[..number_end];
-    let remainder = &string[number_end..];
-    (remainder, number)
+    extract(|char| char.is_ascii_digit(), string)
 }
 
 fn extract_whitespace(string: &str) -> (&str, &str) {
-    let whitespace_end = string
-        .char_indices()
-        .find_map(|(index, char)| {
-            if char.is_whitespace() {
-                return None;
-            } else {
-                return Some(index);
-            }
-        })
-        .unwrap_or_else(|| string.len());
-
-    let remainder = &string[whitespace_end..];
-    let whitespace = &string[..whitespace_end];
-    (remainder, whitespace)
+    extract(|char| char.is_whitespace(), string)
 }
 
 fn convert_strings_to_expressions(buffer: Buffer) -> Vec<Expression> {
@@ -275,6 +277,16 @@ mod tests {
     fn parse_whitespace() {
         assert_eq!(Number::new("   5"), ("", Number(5)));
     }
+    /* #[test]
+    fn parse_binding_value() {
+        assert_eq!(
+            Binding::new("let i = 10"),
+            Binding {
+                name: "a".to_string(),
+                value: Value::Number(Number(10))
+            }
+        );
+         }*/
     #[test]
     fn evaluate_number() {
         assert_eq!(Expression::new("4 / 2").1.eval(), Value::Number(Number(2)));
