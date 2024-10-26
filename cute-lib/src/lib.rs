@@ -1,3 +1,5 @@
+mod token;
+
 use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
@@ -137,8 +139,8 @@ fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
         })
         .unwrap_or(string.len());
 
-    let extracted = &string[..extracted_end];
     let remainder = &string[extracted_end..];
+    let extracted = &string[..extracted_end];
     (remainder, extracted)
 }
 
@@ -162,6 +164,10 @@ fn extract_number(string: &str) -> (&str, &str) {
 
 fn extract_whitespace(string: &str) -> (&str, &str) {
     extract(|char| char.is_whitespace(), string)
+}
+
+fn extract_until_whitespace(string: &str) -> (&str, &str) {
+    extract(|char| !char.is_whitespace(), string)
 }
 
 fn extract_keyword<'a>(string: &'a str, starting_string: &str) -> Result<&'a str, String> {
