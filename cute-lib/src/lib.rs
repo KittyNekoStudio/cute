@@ -38,7 +38,7 @@ struct Binding {
 }
 
 #[derive(Debug, PartialEq)]
-struct Enviroment {
+struct Environment {
     env: HashMap<String, Value>,
 }
 
@@ -111,7 +111,7 @@ impl Binding {
     }
 }
 
-impl Enviroment {
+impl Environment {
     pub fn new() -> Self {
         Self {
             env: HashMap::new(),
@@ -388,11 +388,11 @@ mod tests {
     }
     #[test]
     fn evaluate_binded_value() {
-        let mut enviroment = Enviroment::new();
+        let mut environment = Environment::new();
         let binding = Binding::new("let i = 10 + 3").unwrap().1;
-        enviroment.store_binding(binding.clone());
+        environment.store_binding(binding.clone());
         assert_eq!(
-            enviroment.get_binding(&binding.name),
+            environment.get_binding(&binding.name),
             Value::Number(Number(13))
         );
     }
