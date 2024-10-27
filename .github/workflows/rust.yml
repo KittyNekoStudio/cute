@@ -7,10 +7,12 @@ jobs:
   test:
     name: cargo test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cute-lib
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - working-directory: ./cute-lib
       - run: cargo test --all-features
 
   # Check formatting with rustfmt
