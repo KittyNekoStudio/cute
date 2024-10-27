@@ -1,8 +1,9 @@
 use cute_lib::file::read_to_file;
 use cute_lib::lexer::tokenize;
+use cute_lib::parser::parse;
 fn main() {
-    let mut source = Vec::new();
-    read_to_file("foo.cute", &mut source);
+    let source = read_to_file("foo.cute");
     let tokens = tokenize(source);
-    println!("{tokens:?}");
+    let statement = parse(tokens);
+    println!("{statement:?}");
 }
