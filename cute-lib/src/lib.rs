@@ -4,6 +4,6 @@ mod statement;
 mod expression;
 pub mod file;
 pub mod lexer;
-mod parser;
+pub mod parser;
 mod utils;
 mod value;

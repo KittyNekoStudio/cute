@@ -9,7 +9,7 @@ pub enum TokenKind {
 
     // Operations
     Plus,
-    Dash,
+    Minus,
     Star,
     Binding,
     Assignment,
@@ -18,6 +18,7 @@ pub enum TokenKind {
     Let,
     MutLet,
 
+    EOL,
     EOF,
 }
 
@@ -72,7 +73,7 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
             } else if value == "+" {
                 lexer.push_token(Token::new(TokenKind::Plus, value));
             } else if value == "-" {
-                lexer.push_token(Token::new(TokenKind::Dash, value));
+                lexer.push_token(Token::new(TokenKind::Minus, value));
             } else if value == "*" {
                 lexer.push_token(Token::new(TokenKind::Star, value));
             } else if keywords.get(value).is_some() {
@@ -128,6 +129,9 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                 }
             }
             str = string.to_string();
+            if str == "" {
+                lexer.push_token(Token::new(TokenKind::EOL, "EOL"));
+            }
             lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
         }
         lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
@@ -246,7 +250,7 @@ mod tests {
             token,
             vec![
                 Token {
-                    kind: TokenKind::Dash,
+                    kind: TokenKind::Minus,
                     value: "-".to_string()
                 },
                 Token {
@@ -303,7 +307,7 @@ mod tests {
                     value: "2".to_string()
                 },
                 Token {
-                    kind: TokenKind::Dash,
+                    kind: TokenKind::Minus,
                     value: "-".to_string()
                 },
                 Token {

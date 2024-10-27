@@ -1,13 +1,12 @@
 use std::fs::File;
-use std::io::prelude::*;
+use std::io::{prelude::*, BufReader};
 
-pub fn read_to_file(path: &str, buffer: &mut Vec<String>) {
-    let mut file = File::open(path).unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    for string in contents.lines() {
-    buffer.push(string.to_string());
-    }
+pub fn read_to_file(path: &str) -> Vec<String> {
+    let file = File::open(path).expect("No such file found");
+    let buf = BufReader::new(file);
+    buf.lines()
+        .map(|line| line.expect("Could not parse line"))
+        .collect()
 }
 
 /*pub fn write_to_file(path: &str, buffer: &mut Vec<String>) {
