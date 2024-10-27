@@ -8,6 +8,6 @@ pub struct BlockStatement {
     pub body: Vec<Statement>
 }
 
-pub struct ExpressionStatement<'a> {
-    expression: Expression<'a>
+pub struct ExpressionStatement {
+    expression: Expression
 }

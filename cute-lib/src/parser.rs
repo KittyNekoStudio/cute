@@ -26,11 +26,11 @@ enum BindingPower {
 
 type StatementHandler = fn(&mut Parser) -> Statement;
 type NudHandler = fn(parser: &mut Parser) -> Expression;
-type LedHandler = for<'a> fn(
+type LedHandler =  fn(
     parser: &mut Parser,
-    left: Expression<'a>,
+    left: Expression,
     binding_power: BindingPower,
-) -> Expression<'a>;
+) -> Expression;
 
 type StatmentLookUp = HashMap<TokenKind, StatementHandler>;
 type NudLookUp = HashMap<TokenKind, NudHandler>;
