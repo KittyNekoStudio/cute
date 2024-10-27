@@ -10,7 +10,8 @@ pub enum TokenKind {
     // Operations
     Plus,
     Minus,
-    Star,
+    Mul,
+    Div,
     Binding,
     Assignment,
 
@@ -74,8 +75,10 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                 lexer.push_token(Token::new(TokenKind::Plus, value));
             } else if value == "-" {
                 lexer.push_token(Token::new(TokenKind::Minus, value));
-            } else if value == "*" {
-                lexer.push_token(Token::new(TokenKind::Star, value));
+            }  else if value == "*" {
+                lexer.push_token(Token::new(TokenKind::Mul, value));
+            } else if value == "/" {
+                lexer.push_token(Token::new(TokenKind::Div, value));
             } else if keywords.get(value).is_some() {
                 if previous == None {
                     lexer.push_token(Token::new(
@@ -280,7 +283,7 @@ mod tests {
             token,
             vec![
                 Token {
-                    kind: TokenKind::Star,
+                    kind: TokenKind::Mul,
                     value: "*".to_string()
                 },
                 Token {

@@ -100,7 +100,7 @@ fn create_token_lookups(
     );
 
     // Additive and Multiplicative
-    led(
+     led(
         bp_lookup,
         led_lookup,
         TokenKind::Plus,
@@ -108,10 +108,26 @@ fn create_token_lookups(
         |parser, token, bp| parse_binary_expression(parser, token, bp),
     );
 
+   led(
+        bp_lookup,
+        led_lookup,
+        TokenKind::Minus,
+        BindingPower::Additive,
+        |parser, token, bp| parse_binary_expression(parser, token, bp),
+    );
+
     led(
         bp_lookup,
         led_lookup,
-        TokenKind::Star,
+        TokenKind::Mul,
+        BindingPower::Multiplicitive,
+        |parser, token, bp| parse_binary_expression(parser, token, bp),
+    );
+
+    led(
+        bp_lookup,
+        led_lookup,
+        TokenKind::Div,
         BindingPower::Multiplicitive,
         |parser, token, bp| parse_binary_expression(parser, token, bp),
     );
