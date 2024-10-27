@@ -1,16 +1,16 @@
 use crate::expression::Expression;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Statement {
     Expr(ExpressionStatement)
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct BlockStatement {
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ExpressionStatement {
     expression: Expression,
 }

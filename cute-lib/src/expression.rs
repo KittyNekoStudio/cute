@@ -1,6 +1,6 @@
 use crate::lexer::Token;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Number(Number),
     Symbol(Symbol),
@@ -8,13 +8,13 @@ pub enum Expression {
 }
 
 // Literals
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Number(pub f64);
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Symbol(pub String);
 
 // Complex expressions
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryExpression {
     lhs: Expression,
     op: Token,
