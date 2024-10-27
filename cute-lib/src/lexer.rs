@@ -1,14 +1,22 @@
 use crate::utils::{extract_until_whitespace, extract_whitespace};
+use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TokenKind {
+    // Types
     Number,
+
+    // Operations
     Plus,
     Dash,
     Star,
-    Let,
     Binding,
     Assignment,
+
+    // Reserved keywords
+    Let,
+    MutLet,
+
     EOF,
 }
 
@@ -25,6 +33,11 @@ pub struct Lexer {
     loc: (i32, i32),
 }
 
+#[derive(Debug, PartialEq)]
+struct KeywordMap {
+    hashmap: HashMap<String, TokenKind>,
+}
+
 impl Lexer {
     pub fn new(source: Vec<String>) -> Self {
         Self {
@@ -36,15 +49,21 @@ impl Lexer {
     fn push_token(&mut self, token: Token) {
         self.tokens.push(token);
     }
-    fn previous(&mut self) -> &TokenKind {
-        &self.tokens.last().unwrap().kind
+    fn previous(&mut self) -> Option<&Token> {
+        if self.tokens.last().is_none() {
+            return None;
+        } else {
+            return Some(&self.tokens.last().unwrap());
+        }
     }
 }
 
 pub fn tokenize(source: Vec<String>) -> Vec<Token> {
     let mut lexer = Lexer::new(source.clone());
+    let keywords = KeywordMap::create();
     for mut str in source {
         while !str.is_empty() {
+            let previous = lexer.previous();
             str = extract_whitespace(&str).0.to_string();
             let (string, value) = extract_until_whitespace(&str);
             if value.parse::<i32>().is_ok() {
@@ -55,12 +74,57 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                 lexer.push_token(Token::new(TokenKind::Dash, value));
             } else if value == "*" {
                 lexer.push_token(Token::new(TokenKind::Star, value));
-            } else if value == "let" {
-                lexer.push_token(Token::new(TokenKind::Let, value));
-            } else if lexer.previous() == &TokenKind::Let {
-                lexer.push_token(Token::new(TokenKind::Binding, value));
+            } else if keywords.get(value).is_some() {
+                if previous == None {
+                    lexer.push_token(Token::new(
+                        *keywords
+                            .get(value)
+                            .expect("failed in pushing keyword from map in lexer"),
+                        value,
+                    ));
+                } else {
+                    match value {
+                        "let" => {
+                            assert!(
+                                previous.unwrap().kind != TokenKind::Let
+                                    && previous.unwrap().kind != TokenKind::MutLet,
+                                "Variable name is a keyword"
+                            );
+                            lexer.push_token(Token::new(TokenKind::Let, value));
+                        }
+                        "let!" => {
+                            assert!(
+                                previous.unwrap().kind != TokenKind::Let
+                                    && previous.unwrap().kind != TokenKind::MutLet,
+                                "Variable name is a keyword"
+                            );
+                            lexer.push_token(Token::new(TokenKind::MutLet, value));
+                        }
+                        _ => (),
+                    }
+                }
+            } else if keywords.get(&previous.unwrap().value).is_some() {
+                if previous.unwrap().kind == TokenKind::Let
+                    || previous.unwrap().kind == TokenKind::MutLet
+                {
+                    lexer.push_token(Token::new(TokenKind::Binding, value));
+                }
             } else if value == "=" {
                 lexer.push_token(Token::new(TokenKind::Assignment, value));
+            }
+            // TODO! fix comment handling
+            // comments don't return token before // when there is no space on both sides
+            // eg. 69//420
+            // should return 69 but returns nothing
+            else if value.contains("//") {
+                if value.ends_with("//") {
+                    let value = &value[..value.len() - 2];
+                    str = value.to_string();
+                    continue;
+                } else {
+                    str = "".to_string();
+                    continue;
+                }
             }
             str = string.to_string();
             lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
@@ -80,6 +144,26 @@ impl Token {
     }
 }
 
+impl KeywordMap {
+    fn new() -> Self {
+        Self {
+            hashmap: HashMap::new(),
+        }
+    }
+    pub fn create() -> Self {
+        let mut keyword_map = Self::new();
+        keyword_map
+            .hashmap
+            .insert("let".to_string(), TokenKind::Let);
+        keyword_map
+            .hashmap
+            .insert("let!".to_string(), TokenKind::MutLet);
+        keyword_map
+    }
+    pub fn get(&self, key: &str) -> Option<&TokenKind> {
+        self.hashmap.get(key)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -243,5 +327,11 @@ mod tests {
                 }
             ]
         );
+    }
+    #[test]
+    fn check_keyword_hashmap() {
+        let keyword_map = KeywordMap::create();
+        assert_eq!(keyword_map.get("let").unwrap(), &TokenKind::Let);
+        assert_eq!(keyword_map.get("let!").unwrap(), &TokenKind::MutLet);
     }
 }

@@ -2,7 +2,7 @@ mod binding;
 mod environment;
 mod expression;
 pub mod file;
-pub mod token;
+pub mod lexer;
 mod types;
 mod utils;
 mod value;
