@@ -1,6 +1,4 @@
-use crate::utils::*;
-use crate::types::Operation;
-use std::fs::{File, OpenOptions};
+use std::fs::File;
 use std::io::prelude::*;
 
 pub fn read_to_file(path: &str, buffer: &mut Vec<String>) {
@@ -12,7 +10,7 @@ pub fn read_to_file(path: &str, buffer: &mut Vec<String>) {
     }
 }
 
-pub fn write_to_file(path: &str, buffer: &mut Vec<String>) {
+/*pub fn write_to_file(path: &str, buffer: &mut Vec<String>) {
     read_to_file(path, buffer);
     // TODO! remove having to clone buffer
     let expressions = convert_strings_to_expressions(buffer.to_owned());
@@ -140,4 +138,4 @@ mod tests {
         let mut buffer = Vec::new();
         write_to_file("tests/test.cute", &mut buffer);
     }
-}
+}*/

@@ -1,10 +1,11 @@
 use crate::utils::{extract_until_whitespace, extract_whitespace};
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum TokenKind {
     // Types
     Number,
+    Identifier,
 
     // Operations
     Plus,
@@ -20,10 +21,10 @@ pub enum TokenKind {
     EOF,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
-    kind: TokenKind,
-    value: String,
+    pub kind: TokenKind,
+    pub value: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -66,7 +67,7 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
             let previous = lexer.previous();
             str = extract_whitespace(&str).0.to_string();
             let (string, value) = extract_until_whitespace(&str);
-            if value.parse::<i32>().is_ok() {
+            if value.parse::<f64>().is_ok() {
                 lexer.push_token(Token::new(TokenKind::Number, value));
             } else if value == "+" {
                 lexer.push_token(Token::new(TokenKind::Plus, value));

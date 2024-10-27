@@ -1,4 +1,4 @@
-use crate::binding::Binding;
+/*use crate::binding::Binding;
 use crate::value::Value;
 use std::collections::HashMap;
 
@@ -36,4 +36,4 @@ mod tests {
             Value::Number(Number(13))
         );
     }
-}
+}*/

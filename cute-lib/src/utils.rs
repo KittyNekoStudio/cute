@@ -1,6 +1,3 @@
-use crate::expression::Expression;
-use crate::types::Operation;
-
 fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
     let extracted_end = string
         .char_indices()
@@ -18,7 +15,7 @@ fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
     (remainder, extracted)
 }
 
-pub fn extract_operation(string: &str) -> (&str, Operation) {
+/*pub fn extract_operation(string: &str) -> (&str, Operation) {
     let (string, _) = extract_whitespace(string);
     let op = match &string[0..1] {
         "+" => Operation::Addition,
@@ -30,7 +27,7 @@ pub fn extract_operation(string: &str) -> (&str, Operation) {
     let string = &string[1..];
 
     (string, op)
-}
+}*/
 
 pub fn extract_number(string: &str) -> (&str, &str) {
     extract(|char| char.is_ascii_digit(), string)
@@ -56,15 +53,15 @@ pub fn extract_name(string: &str) -> Result<(&str, &str), String> {
     Ok(extract(|char| !char.is_whitespace(), string))
 }
 
-pub fn convert_strings_to_expressions(buffer: Vec<String>) -> Vec<Expression> {
+/*pub fn convert_strings_to_expressions(buffer: Vec<String>) -> Vec<Expression> {
     let mut vec = Vec::new();
     for v in buffer {
         vec.push(Expression::new(&v).1);
     }
     vec
-}
+}*/
 
-#[cfg(test)]
+/*#[cfg(test)]
 mod tests {
     use super::*;
     use crate::types::Number;
@@ -95,4 +92,4 @@ mod tests {
             }
         );
     }*/
-}
+}*/
