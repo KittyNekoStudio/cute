@@ -3,9 +3,9 @@ fn extract(accept: impl Fn(char) -> bool, string: &str) -> (&str, &str) {
         .char_indices()
         .find_map(|(index, char)| {
             if accept(char) {
-                return None;
+                None
             } else {
-                return Some(index);
+                Some(index)
             }
         })
         .unwrap_or(string.len());

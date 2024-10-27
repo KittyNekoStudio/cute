@@ -12,15 +12,15 @@ struct Parser {
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 enum BindingPower {
     Default,
-    Comma,
-    Assignment,
-    Logical,
-    Relative,
+    //  Comma,
+    //  Assignment,
+    //  Logical,
+    //  Relative,
     Additive,
     Multiplicitive,
-    Unary,
-    Call,
-    Member,
+    //  Unary,
+    //  Call,
+    //  Member,
     Primary,
 }
 
@@ -65,7 +65,7 @@ fn nud(
     nud_lookup.insert(kind, nud_fn);
 }
 
-fn statement(
+/*fn statement(
     mut bp_lookup: BpLookUp,
     mut stmt_lookup: StatmentLookUp,
     kind: TokenKind,
@@ -74,10 +74,10 @@ fn statement(
 ) {
     bp_lookup.insert(kind, binding_power);
     stmt_lookup.insert(kind, stmt_fn);
-}
+}*/
 
 fn create_token_lookups(
-    stmt_lookup: &mut StatmentLookUp,
+    _stmt_lookup: &mut StatmentLookUp,
     nud_lookup: &mut NudLookUp,
     led_lookup: &mut LedLookUp,
     bp_lookup: &mut BpLookUp,
@@ -183,7 +183,7 @@ pub fn parse(tokens: Vec<Token>) -> BlockStatement {
         body.push(parse_statement(&mut parser));
     }
 
-    return BlockStatement { body };
+    BlockStatement { body }
 }
 
 impl Parser {
@@ -231,9 +231,7 @@ fn parse_statement(parser: &mut Parser) -> Statement {
         None => {
             let expression = parse_expression(parser, &BindingPower::Default);
             parser.expect(TokenKind::EOL);
-            return Expr(ExpressionStatement::new(expression));
+            Expr(ExpressionStatement::new(expression))
         }
     }
 }
-
-

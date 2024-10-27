@@ -53,9 +53,9 @@ impl Lexer {
     }
     fn previous(&mut self) -> Option<&Token> {
         if self.tokens.last().is_none() {
-            return None;
+            None
         } else {
-            return Some(&self.tokens.last().unwrap());
+            Some(&self.tokens.last().unwrap())
         }
     }
 }
