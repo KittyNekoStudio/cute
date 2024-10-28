@@ -34,6 +34,36 @@ type NudLookUp = HashMap<TokenKind, NudHandler>;
 type LedLookUp = HashMap<TokenKind, LedHandler>;
 type BpLookUp = HashMap<TokenKind, BindingPower>;
 
+impl Parser {
+    fn new(tokens: Vec<Token>) -> Self {
+        Self { tokens, loc: 0 }
+    }
+    fn current_token(&self) -> Token {
+        self.tokens[self.loc].clone()
+    }
+    fn current_token_kind(&self) -> TokenKind {
+        self.current_token().kind
+    }
+    fn advance(&mut self) -> Token {
+        let token = self.current_token();
+        self.loc += 1;
+        token
+    }
+    fn has_tokens(&self) -> bool {
+        self.loc < self.tokens.len() && self.current_token_kind() != TokenKind::EOF
+    }
+    fn expect(&mut self, expected_kind: TokenKind) -> Token {
+        let token = self.current_token();
+        let kind = token.kind;
+
+        if kind != expected_kind {
+            panic!("Expected TokenKind of: {:?}", expected_kind);
+        }
+
+        self.advance()
+    }
+}
+
 fn create_lookups() -> (StatmentLookUp, NudLookUp, LedLookUp, BpLookUp) {
     (
         HashMap::new(),
@@ -100,7 +130,7 @@ fn create_token_lookups(
     );
 
     // Additive and Multiplicative
-     led(
+    led(
         bp_lookup,
         led_lookup,
         TokenKind::Plus,
@@ -108,7 +138,7 @@ fn create_token_lookups(
         |parser, token, bp| parse_binary_expression(parser, token, bp),
     );
 
-   led(
+    led(
         bp_lookup,
         led_lookup,
         TokenKind::Minus,
@@ -200,36 +230,6 @@ pub fn parse(tokens: Vec<Token>) -> BlockStatement {
     }
 
     BlockStatement { body }
-}
-
-impl Parser {
-    fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, loc: 0 }
-    }
-    fn current_token(&self) -> Token {
-        self.tokens[self.loc].clone()
-    }
-    fn current_token_kind(&self) -> TokenKind {
-        self.current_token().kind
-    }
-    fn advance(&mut self) -> Token {
-        let token = self.current_token();
-        self.loc += 1;
-        token
-    }
-    fn has_tokens(&self) -> bool {
-        self.loc < self.tokens.len() && self.current_token_kind() != TokenKind::EOF
-    }
-    fn expect(&mut self, expected_kind: TokenKind) -> Token {
-        let token = self.current_token();
-        let kind = token.kind;
-
-        if kind != expected_kind {
-            panic!("Expected TokenKind of: {:?}", expected_kind);
-        }
-
-        self.advance()
-    }
 }
 
 fn parse_statement(parser: &mut Parser) -> Statement {

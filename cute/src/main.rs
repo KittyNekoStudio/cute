@@ -6,4 +6,5 @@ fn main() {
     let tokens = tokenize(source);
     let statement = parse(tokens);
     println!("{statement:?}");
+    println!("{}", statement.body.len());
 }
