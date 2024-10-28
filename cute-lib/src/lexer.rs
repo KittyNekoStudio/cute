@@ -75,7 +75,7 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                 lexer.push_token(Token::new(TokenKind::Plus, value));
             } else if value == "-" {
                 lexer.push_token(Token::new(TokenKind::Minus, value));
-            }  else if value == "*" {
+            } else if value == "*" {
                 lexer.push_token(Token::new(TokenKind::Mul, value));
             } else if value == "/" {
                 lexer.push_token(Token::new(TokenKind::Div, value));
@@ -108,7 +108,15 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                         _ => (),
                     }
                 }
-            } else if keywords.get(&previous.unwrap().value).is_some() {
+            } else if previous.is_some()
+                && keywords
+                    .get(
+                        &previous
+                            .expect("Failed Checking If Previous Token Is A Keyword")
+                            .value,
+                    )
+                    .is_some()
+            {
                 if previous.unwrap().kind == TokenKind::Let
                     || previous.unwrap().kind == TokenKind::MutLet
                 {
