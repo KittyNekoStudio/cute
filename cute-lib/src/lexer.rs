@@ -2,7 +2,6 @@ use crate::statement::GenerateAsm;
 use crate::utils::{extract_until_whitespace, extract_whitespace};
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
 
 #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum TokenKind {
@@ -65,9 +64,8 @@ impl Lexer {
 }
 
 impl GenerateAsm for Token {
-    fn generate(&self, file: &mut File) {
+    fn generate(&self, _file: &mut File) {
         if self.kind == TokenKind::Plus {
-            write!(file, "    mov  rdi, {}\n", 3).unwrap();
         }
     }
 }
