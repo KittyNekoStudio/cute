@@ -1,4 +1,7 @@
-use std::fs::File;
+use crate::lexer::tokenize;
+use crate::parser::parse;
+use crate::statement::GenerateAsm;
+use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
 
 pub fn read_to_file(path: &str) -> Vec<String> {
@@ -9,10 +12,12 @@ pub fn read_to_file(path: &str) -> Vec<String> {
         .collect()
 }
 
-/*pub fn write_to_file(path: &str, buffer: &mut Vec<String>) {
-    read_to_file(path, buffer);
+pub fn generate_x86_64_linux_asm(path: &str) {
+    let source = read_to_file("foo.cute");
+    let tokens = tokenize(source);
+    let statements = parse(tokens);
+
     // TODO! remove having to clone buffer
-    let expressions = convert_strings_to_expressions(buffer.to_owned());
     let dot = path
         .char_indices()
         .find_map(|(index, char)| {
@@ -67,26 +72,26 @@ pub fn read_to_file(path: &str) -> Vec<String> {
     write!(file, "    global _start\n").unwrap();
     write!(file, "\n").unwrap();
     write!(file, "_start:\n").unwrap();
+    statements.generate(&mut file);
 
-    for expr in expressions {
-        match expr.op {
+    /*match stmt.op {
             Operation::Addition => {
-                let lhs = expr.lhs.0;
-                let rhs = expr.rhs.0;
+                let lhs = stmt.lhs.0;
+                let rhs = stmt.rhs.0;
                 write!(file, "    mov  rdi, {lhs}\n").unwrap();
                 write!(file, "    add  rdi, {rhs}\n").unwrap();
                 write!(file, "    call print_uint32\n").unwrap();
             }
             Operation::Subtraction => {
-                let lhs = expr.lhs.0;
-                let rhs = expr.rhs.0;
+                let lhs = stmt.lhs.0;
+                let rhs = stmt.rhs.0;
                 write!(file, "    mov  rdi, {lhs}\n").unwrap();
                 write!(file, "    sub  rdi, {rhs}\n").unwrap();
                 write!(file, "    call print_uint32\n").unwrap();
             }
             Operation::Multiplication => {
-                let lhs = expr.lhs.0;
-                let rhs = expr.rhs.0;
+                let lhs = stmt.lhs.0;
+                let rhs = stmt.rhs.0;
                 write!(file, "    mov  rax, {lhs}\n").unwrap();
                 write!(file, "    mov  rdx, {rhs}\n").unwrap();
                 write!(file, "    mul  rdx\n").unwrap();
@@ -97,29 +102,26 @@ pub fn read_to_file(path: &str) -> Vec<String> {
                 assert!(false, "Division not implemented")
             }
         }
-    }
+    }*/
     write!(file, "    mov  rax, 60\n").unwrap();
     write!(file, "    mov  rdi, 0\n").unwrap();
     write!(file, "    syscall\n").unwrap();
 }
 
-#[cfg(test)]
+/*#[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::Number;
     use crate::expression::Expression;
 
     #[test]
     fn string_from_file() {
-        let mut buffer = Vec::new();
-        read_to_file("tests/test-string.cute", &mut buffer);
+        let buffer = read_to_file("tests/test-string.cute");
 
         assert_eq!(buffer, vec!["1 + 3"]);
     }
     #[test]
     fn expression_from_file() {
-        let mut buffer = Vec::new();
-        read_to_file("tests/test-expression.cute", &mut buffer);
+        let mut buffer = read_to_file("tests/test-expression.cute", &mut buffer);
         assert_eq!(
             Expression::new(&buffer[0]),
             (

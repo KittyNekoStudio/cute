@@ -1,11 +1,14 @@
+use crate::statement::GenerateAsm;
 use crate::utils::{extract_until_whitespace, extract_whitespace};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Write;
 
 #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum TokenKind {
     // Types
     Number,
-    Identifier,
+    Symbol,
 
     // Operations
     Plus,
@@ -61,6 +64,14 @@ impl Lexer {
     }
 }
 
+impl GenerateAsm for Token {
+    fn generate(&self, file: &mut File) {
+        if self.kind == TokenKind::Plus {
+            write!(file, "    mov  rdi, {}\n", 3).unwrap();
+        }
+    }
+}
+
 pub fn tokenize(source: Vec<String>) -> Vec<Token> {
     let mut lexer = Lexer::new(source.clone());
     let keywords = KeywordMap::create();
@@ -83,6 +94,10 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                 lexer.push_token(Token::new(TokenKind::Number, value));
             } else if value == "+" {
                 lexer.push_token(Token::new(TokenKind::Plus, value));
+            } else if value.starts_with("\"") && value.ends_with("\"") {
+                let value = value.strip_prefix("\"").unwrap_or(value);
+                let value = value.strip_suffix("\"").unwrap_or(value);
+                lexer.push_token(Token::new(TokenKind::Symbol, value));
             } else if value == "-" {
                 lexer.push_token(Token::new(TokenKind::Minus, value));
             } else if value == "*" {

@@ -2,3 +2,4 @@ cute/target
 cute-lib/target
 *.o
 *.asm
+list-of-features.md

@@ -31,16 +31,8 @@ section .text
     global _start
 
 _start:
-    mov  rdi, 4
-    add  rdi, 9
-    call print_uint32
-    mov  rdi, 32
-    sub  rdi, 4
-    call print_uint32
-    mov  rax, 4
-    mov  rdx, 72
-    mul  rdx
-    mov  rdi, rax 
+    mov  rdi, 43
+    add  rdi, 43
     call print_uint32
     mov  rax, 60
     mov  rdi, 0

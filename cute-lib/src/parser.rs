@@ -13,7 +13,7 @@ struct Parser {
 enum BindingPower {
     Default,
     //  Comma,
-    //  Assignment,
+    Assignment,
     //  Logical,
     //  Relative,
     Additive,
@@ -124,7 +124,7 @@ fn create_token_lookups(
     nud(
         bp_lookup,
         nud_lookup,
-        TokenKind::Identifier,
+        TokenKind::Symbol,
         BindingPower::Primary,
         |parser| parse_primary_expression(parser),
     );
@@ -161,6 +161,14 @@ fn create_token_lookups(
         BindingPower::Multiplicitive,
         |parser, token, bp| parse_binary_expression(parser, token, bp),
     );
+
+    led(
+        bp_lookup,
+        led_lookup,
+        TokenKind::Assignment,
+        BindingPower::Assignment,
+        |parser, token, bp| parse_binary_expression(parser, token, bp),
+    );
 }
 
 fn parse_primary_expression(parser: &mut Parser) -> Expression {
@@ -168,7 +176,8 @@ fn parse_primary_expression(parser: &mut Parser) -> Expression {
         TokenKind::Number => {
             Expression::Number(Number(parser.advance().value.parse::<f64>().unwrap()))
         }
-        TokenKind::Identifier => Expression::Symbol(Symbol(parser.advance().value)),
+        TokenKind::Symbol => Expression::Symbol(Symbol(parser.advance().value)),
+        TokenKind::Assignment => Expression::Symbol(Symbol(parser.advance().value)),
         _ => panic!(
             "Cannot create primary_expression from {:?}",
             parser.current_token_kind()
