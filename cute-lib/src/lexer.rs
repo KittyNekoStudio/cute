@@ -68,7 +68,17 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
         while !str.is_empty() {
             let previous = lexer.previous();
             str = extract_whitespace(&str).0.to_string();
+            // I don't want to have semicolons so this strips them or panics if the file contains semicolons
+            if str == ";" {
+                str = "".to_string();
+                continue;
+            }
             let (string, value) = extract_until_whitespace(&str);
+            let value = value.strip_prefix(";").unwrap_or(value);
+            let value = value.strip_suffix(";").unwrap_or(value);
+            if value.contains(";") {
+                panic!("Semi-colon is not allowed inside values");
+            }
             if value.parse::<f64>().is_ok() {
                 lexer.push_token(Token::new(TokenKind::Number, value));
             } else if value == "+" {
@@ -145,7 +155,7 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
             }
             lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
         }
-        lexer.loc = (lexer.loc.0, lexer.loc.1 + 1);
+        lexer.loc = (lexer.loc.0 + 1, 0);
     }
     lexer.push_token(Token::new(TokenKind::EOF, "EOF"));
     lexer.tokens
