@@ -1,4 +1,4 @@
-Cute is a staticly typed programming language.
+Cute is planned to be a statically typed and native language. 
 
 [ ] Have someone other than me program in cute.
 
