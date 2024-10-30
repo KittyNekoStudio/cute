@@ -32,7 +32,6 @@ section .text
 
 _start:
     mov  rdi, 43
-    add  rdi, 43
     call print_uint32
     mov  rax, 60
     mov  rdi, 0

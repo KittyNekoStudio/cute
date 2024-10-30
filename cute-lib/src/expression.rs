@@ -56,8 +56,6 @@ impl GenerateAsm for Number {
             Number(num) => num,
         };
         write!(file, "    mov  rdi, {num}\n").unwrap();
-        write!(file, "    add  rdi, {num}\n").unwrap();
-        write!(file, "    call print_uint32\n").unwrap();
     }
 }
 impl GenerateAsm for Symbol {

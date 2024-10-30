@@ -3,9 +3,10 @@ use crate::parser::parse;
 use crate::statement::GenerateAsm;
 use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
+use crate::utils::remove_file_extension;
 
-pub fn read_to_file(path: &str) -> Vec<String> {
-    let file = File::open(path).expect("No such file found");
+pub fn read_to_file(path: String) -> Vec<String> {
+    let file = File::open(format!("{path}.cute")).expect("No such file found");
     let buf = BufReader::new(file);
     buf.lines()
         .map(|line| line.expect("Could not parse line"))
@@ -13,25 +14,13 @@ pub fn read_to_file(path: &str) -> Vec<String> {
 }
 
 pub fn generate_x86_64_linux_asm(path: &str) {
-    let source = read_to_file("foo.cute");
+    let path = remove_file_extension(path);
+    let source = read_to_file(path.to_string());
     let tokens = tokenize(source);
     let statements = parse(tokens);
 
     // TODO! remove having to clone buffer
-    let dot = path
-        .char_indices()
-        .find_map(|(index, char)| {
-            if char == '.' {
-                return Some(index);
-            } else {
-                return None;
-            }
-        })
-        .unwrap_or_else(|| path.len());
-
-    let path = &path[..dot];
-
-    let mut file = OpenOptions::new()
+        let mut file = OpenOptions::new()
         .write(true)
         .truncate(true)
         .create(true)
@@ -103,6 +92,7 @@ pub fn generate_x86_64_linux_asm(path: &str) {
             }
         }
     }*/
+    write!(file, "    call print_uint32\n").unwrap();
     write!(file, "    mov  rax, 60\n").unwrap();
     write!(file, "    mov  rdi, 0\n").unwrap();
     write!(file, "    syscall\n").unwrap();
