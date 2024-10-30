@@ -1,7 +1,4 @@
 use crate::lexer::Token;
-use crate::statement::GenerateAsm;
-use std::fs::File;
-use std::io::Write;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
@@ -37,27 +34,4 @@ impl BinaryExpression {
     pub fn get_rhs(&self) -> &Expression {
         &self.rhs
     }
-}
-impl GenerateAsm for Expression {
-    fn generate(&self, file: &mut File) {
-        match self {
-            Expression::Number(num) => num.generate(file),
-            Expression::Binary(num) => num.generate(file),
-            Expression::Symbol(num) => num.generate(file),
-        }
-    }
-}
-impl GenerateAsm for BinaryExpression {
-    fn generate(&self, _file: &mut File) {}
-}
-impl GenerateAsm for Number {
-    fn generate(&self, file: &mut File) {
-        let num = match self {
-            Number(num) => num,
-        };
-        write!(file, "    mov  rdi, {num}\n").unwrap();
-    }
-}
-impl GenerateAsm for Symbol {
-    fn generate(&self, _file: &mut File) {}
 }

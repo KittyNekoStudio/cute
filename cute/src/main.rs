@@ -13,6 +13,7 @@ fn main() {
         };
     let source = read_to_file(path.to_string());
     let tokens = tokenize(source);
+    println!("{tokens:?}");
     let statements = parse(tokens);
     println!("{statements:?}");
     println!("{}", statements.body.len());

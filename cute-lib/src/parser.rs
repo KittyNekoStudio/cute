@@ -162,12 +162,23 @@ fn create_token_lookups(
         |parser, token, bp| parse_binary_expression(parser, token, bp),
     );
 
+    // Assignment
     led(
         bp_lookup,
         led_lookup,
         TokenKind::Assignment,
         BindingPower::Assignment,
         |parser, token, bp| parse_binary_expression(parser, token, bp),
+    );
+
+    // Grouping
+
+    nud(
+        bp_lookup,
+        nud_lookup,
+        TokenKind::OpenPren,
+        BindingPower::Default,
+        |parser| parse_parentheses(parser),
     );
 }
 
@@ -203,6 +214,7 @@ fn parse_expression(parser: &mut Parser, binding_power: &BindingPower) -> Expres
         &mut led_lookup,
         &mut bp_lookup,
     );
+    //println!("{parser:?}");
 
     // First parse the NUD
     let mut token_kind = parser.current_token_kind();
@@ -259,4 +271,11 @@ fn parse_statement(parser: &mut Parser) -> Statement {
             Expr(ExpressionStatement::new(expression))
         }
     }
+}
+
+fn parse_parentheses(parser: &mut Parser) -> Expression {
+    parser.expect(TokenKind::OpenPren);
+    let expression = parse_expression(parser, &BindingPower::Default);
+    parser.expect(TokenKind::ClosedPren);
+    expression
 }

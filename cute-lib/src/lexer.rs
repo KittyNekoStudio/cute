@@ -1,7 +1,5 @@
-use crate::statement::GenerateAsm;
 use crate::utils::{extract_until_whitespace, extract_whitespace};
 use std::collections::HashMap;
-use std::fs::File;
 
 #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum TokenKind {
@@ -20,7 +18,10 @@ pub enum TokenKind {
     // Reserved keywords
     Let,
     MutLet,
+    Write,
 
+    OpenPren,
+    ClosedPren,
     EOL,
     EOF,
 }
@@ -63,13 +64,6 @@ impl Lexer {
     }
 }
 
-impl GenerateAsm for Token {
-    fn generate(&self, _file: &mut File) {
-        if self.kind == TokenKind::Plus {
-        }
-    }
-}
-
 pub fn tokenize(source: Vec<String>) -> Vec<Token> {
     let mut lexer = Lexer::new(source.clone());
     let keywords = KeywordMap::create();
@@ -85,9 +79,11 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
             let (string, value) = extract_until_whitespace(&str);
             let value = value.strip_prefix(";").unwrap_or(value);
             let value = value.strip_suffix(";").unwrap_or(value);
+            //println!("{str}");
             if value.contains(";") {
                 panic!("Semi-colon is not allowed inside values");
             }
+
             if value.parse::<f64>().is_ok() {
                 lexer.push_token(Token::new(TokenKind::Number, value));
             } else if value == "+" {

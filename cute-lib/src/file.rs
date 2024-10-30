@@ -1,9 +1,8 @@
 use crate::lexer::tokenize;
 use crate::parser::parse;
-use crate::statement::GenerateAsm;
+use crate::utils::remove_file_extension;
 use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
-use crate::utils::remove_file_extension;
 
 pub fn read_to_file(path: String) -> Vec<String> {
     let file = File::open(format!("{path}.cute")).expect("No such file found");
@@ -17,16 +16,16 @@ pub fn generate_x86_64_linux_asm(path: &str) {
     let path = remove_file_extension(path);
     let source = read_to_file(path.to_string());
     let tokens = tokenize(source);
-    let statements = parse(tokens);
+    let _statements = parse(tokens);
 
     // TODO! remove having to clone buffer
-        let mut file = OpenOptions::new()
+    let mut file = OpenOptions::new()
         .write(true)
         .truncate(true)
         .create(true)
         .open(format!("{path}.asm"))
         .unwrap();
-    // TODO! add comments to asm
+
     write!(file, "    global print_uint32\n").unwrap();
     write!(file, "\n").unwrap();
     write!(file, "print_uint32:\n").unwrap();
@@ -61,8 +60,6 @@ pub fn generate_x86_64_linux_asm(path: &str) {
     write!(file, "    global _start\n").unwrap();
     write!(file, "\n").unwrap();
     write!(file, "_start:\n").unwrap();
-    statements.generate(&mut file);
-
     /*match stmt.op {
             Operation::Addition => {
                 let lhs = stmt.lhs.0;
