@@ -52,6 +52,10 @@ pub fn extract_whitespace(string: &str) -> (&str, &str) {
     extract(|char| char.is_whitespace(), string)
 }
 
+pub fn exrtact_until_char(string: &str, until: char) -> (&str, &str) {
+    extract(|char| char != until, string)
+}
+
 pub fn extract_until_whitespace(string: &str) -> (&str, &str) {
     extract(|char| !char.is_whitespace(), string)
 }

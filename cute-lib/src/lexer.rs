@@ -1,4 +1,4 @@
-use crate::utils::{extract_until_whitespace, extract_whitespace};
+use crate::utils::{exrtact_until_char, extract_until_whitespace, extract_whitespace};
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
@@ -124,6 +124,9 @@ pub fn tokenize(source: Vec<String>) -> Vec<Token> {
                             );
                             lexer.push_token(Token::new(TokenKind::MutLet, value));
                         }
+                        "write" => {
+                            lexer.push_token(Token::new(TokenKind::Write, value));
+                        }
                         _ => (),
                     }
                 }
@@ -193,6 +196,9 @@ impl KeywordMap {
         keyword_map
             .hashmap
             .insert("let!".to_string(), TokenKind::MutLet);
+        keyword_map
+            .hashmap
+            .insert("write".to_string(), TokenKind::Write);
         keyword_map
     }
     pub fn get(&self, key: &str) -> Option<&TokenKind> {

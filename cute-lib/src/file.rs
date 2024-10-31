@@ -1,5 +1,7 @@
+use crate::generate_asm::generate_asm;
 use crate::lexer::tokenize;
 use crate::parser::parse;
+use crate::statement::Statement::Expr;
 use crate::utils::remove_file_extension;
 use std::fs::{File, OpenOptions};
 use std::io::{prelude::*, BufReader};
@@ -16,7 +18,7 @@ pub fn generate_x86_64_linux_asm(path: &str) {
     let path = remove_file_extension(path);
     let source = read_to_file(path.to_string());
     let tokens = tokenize(source);
-    let _statements = parse(tokens);
+    let statements = parse(tokens);
 
     // TODO! remove having to clone buffer
     let mut file = OpenOptions::new()
@@ -89,7 +91,14 @@ pub fn generate_x86_64_linux_asm(path: &str) {
             }
         }
     }*/
-    write!(file, "    call print_uint32\n").unwrap();
+    println!("{statements:?}");
+    for stmt in statements.body {
+        match stmt {
+            Expr(expr) => {
+                generate_asm(&mut file, expr, 0);
+            }
+        }
+    }
     write!(file, "    mov  rax, 60\n").unwrap();
     write!(file, "    mov  rdi, 0\n").unwrap();
     write!(file, "    syscall\n").unwrap();

@@ -5,6 +5,7 @@ pub enum Expression {
     Number(Number),
     Symbol(Symbol),
     Binary(Box<BinaryExpression>),
+    Write
 }
 
 // Literals

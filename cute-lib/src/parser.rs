@@ -116,8 +116,17 @@ fn create_token_lookups(
     nud(
         bp_lookup,
         nud_lookup,
-        TokenKind::Number,
+        TokenKind::Write,
         BindingPower::Primary,
+        |parser| parse_write(parser),
+    );
+
+    // Literals and Symbols
+    nud(
+        bp_lookup,
+        nud_lookup,
+        TokenKind::Number,
+        BindingPower::Default,
         |parser| parse_primary_expression(parser),
     );
 
@@ -214,7 +223,6 @@ fn parse_expression(parser: &mut Parser, binding_power: &BindingPower) -> Expres
         &mut led_lookup,
         &mut bp_lookup,
     );
-    //println!("{parser:?}");
 
     // First parse the NUD
     let mut token_kind = parser.current_token_kind();
@@ -277,5 +285,11 @@ fn parse_parentheses(parser: &mut Parser) -> Expression {
     parser.expect(TokenKind::OpenPren);
     let expression = parse_expression(parser, &BindingPower::Default);
     parser.expect(TokenKind::ClosedPren);
+    expression
+}
+
+fn parse_write(parser: &mut Parser) -> Expression {
+    parser.expect(TokenKind::Write);
+    let expression = parse_expression(parser, &BindingPower::Default);
     expression
 }
