@@ -1,5 +1,6 @@
 use std::process::Command;
 
+/// Compiles and links into an x86-64 executable.
 pub fn compile_and_link(path: &str) {
     let mut nasm = Command::new("nasm");
     nasm.arg("-felf64");
@@ -14,6 +15,7 @@ pub fn compile_and_link(path: &str) {
     ld.status().unwrap();
 }
 
+/// Removes the file extension so we can create .asm and .o files with the same name.
 pub fn remove_file_extension(path: &str) -> String {
     let dot = path
         .char_indices()

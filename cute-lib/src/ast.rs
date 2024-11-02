@@ -1,17 +1,19 @@
-trait Ast {}
-
 #[derive(Debug, PartialEq)]
+/// Expression
+/// All the different expressions cute supports.
 pub enum Expression {
     Number(Number),
     Add(Box<Add>),
 }
 
 #[derive(Debug, PartialEq)]
+/// Number
+/// An unsigned 64 bit number.
 pub struct Number(pub u64);
 
-impl Ast for Number {}
-
 #[derive(Debug, PartialEq)]
+/// Add
+/// An expression that adds two expressions together.
 pub struct Add {
     lhs: Expression,
     rhs: Expression,
@@ -22,8 +24,6 @@ impl Add {
         Self { lhs, rhs }
     }
 }
-
-impl Ast for Add {}
 
 #[cfg(test)]
 mod tests {

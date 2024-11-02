@@ -1,25 +1,30 @@
 use crate::ast::Expression;
 use crate::ast::{Add, Number};
-use crate::lexer::{Token, TokenKind};
+use crate::lexer::{parse_tokens, Token, TokenKind};
 
 #[derive(Debug, PartialEq, Clone)]
+/// Parser
+/// Holds a vector of tokens and keeps track of where in the vector it's at.
 struct Parser {
     tokens: Vec<Token>,
     loc: usize,
 }
 
 impl Parser {
+    /// Takes a vector of strings and calls parse_tokens.
     pub fn new(source: Vec<String>) -> Self {
         Self {
             tokens: parse_tokens(source),
             loc: 0,
         }
     }
+    /// Removes from loc n number of times.
     pub fn consume(&mut self, times_consume: usize) {
         for _ in 0..times_consume {
             self.tokens.remove(self.loc);
         }
     }
+    /// Looks ahead of loc + an offset.
     pub fn peek(&self, offset: usize) -> Option<&Token> {
         if self.loc + offset >= self.tokens.len() {
             return None;
@@ -28,6 +33,8 @@ impl Parser {
     }
 }
 
+/// Parses a single expression.
+/// Used in parse_expressions to parse a token further in the vector of tokens.
 fn parse_expression(token: &Token) -> Option<Expression> {
     if token.kind() == &TokenKind::Number {
         return Some(Expression::Number(Number(
@@ -37,6 +44,8 @@ fn parse_expression(token: &Token) -> Option<Expression> {
     None
 }
 
+/// Loops through all the tokens the parser holds.
+/// Returns a vector of expressions.
 fn parse_expressions(parser: &mut Parser) -> Vec<Expression> {
     let mut exprs = Vec::new();
 
@@ -60,14 +69,6 @@ fn parse_expressions(parser: &mut Parser) -> Vec<Expression> {
         parser.loc += 1;
     }
     exprs
-}
-fn parse_tokens(source: Vec<String>) -> Vec<Token> {
-    let mut tokens = Vec::new();
-    for str in source {
-        tokens.push(Token::new(&str));
-    }
-
-    tokens
 }
 
 #[cfg(test)]

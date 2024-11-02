@@ -1,10 +1,14 @@
 #[derive(Debug, PartialEq, Clone)]
+/// Token
+/// Holds a TokenKind and a value as a string.
 pub struct Token {
     kind: TokenKind,
     value: String,
 }
 
 impl Token {
+    /// Takes in a &str and uses it to parse the token kind,
+    /// as well as the value.
     pub fn new(str: &str) -> Self {
         let (value, _) = parse_token(str);
         let kind = parse_token_kind(value).expect("TokenKind not recognized");
@@ -13,20 +17,26 @@ impl Token {
             value: value.to_string(),
         }
     }
+    /// Returns a reference to the TokenKind.
     pub fn kind(&self) -> &TokenKind {
         &self.kind
     }
+    /// Returns a reference to the value.
     pub fn value(&self) -> &String {
         &self.value
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
+/// TokenKind
+/// All the variants that a token can be.
 pub enum TokenKind {
     Number,
     Plus,
 }
 
+/// Parses the value for the token.
+/// Returns the value and the remainder of the &str.
 fn parse_token(str: &str) -> (&str, &str) {
     let extracted_index = str
         .char_indices()
@@ -54,6 +64,7 @@ fn parse_token(str: &str) -> (&str, &str) {
     (value, remainder)
 }
 
+/// Parses the token kind from a &str.
 fn parse_token_kind(str: &str) -> Option<TokenKind> {
     if str.chars().all(|char| char::is_ascii_digit(&char)) {
         return Some(TokenKind::Number);
@@ -62,6 +73,13 @@ fn parse_token_kind(str: &str) -> Option<TokenKind> {
     }
     None
 }
+
+/// Parses each String in a vector.
+/// Returns a vector of tokens.
+pub fn parse_tokens(source: Vec<String>) -> Vec<Token> {
+    source.iter().map(|str| Token::new(&str)).collect()
+}
+
 
 #[cfg(test)]
 mod tests {
