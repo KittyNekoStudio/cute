@@ -1,5 +1,5 @@
-#[derive(Debug, PartialEq)]
-struct Token {
+#[derive(Debug, PartialEq, Clone)]
+pub struct Token {
     kind: TokenKind,
     value: String,
 }
@@ -16,10 +16,13 @@ impl Token {
     pub fn kind(&self) -> &TokenKind {
         &self.kind
     }
+    pub fn value(&self) -> &String {
+        &self.value
+    }
 }
 
-#[derive(Debug, PartialEq)]
-enum TokenKind {
+#[derive(Debug, PartialEq, Clone)]
+pub enum TokenKind {
     Number,
     Plus,
 }
