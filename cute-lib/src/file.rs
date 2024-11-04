@@ -8,3 +8,16 @@ pub fn read_file(path: String) -> Vec<String> {
         .map(|line| line.expect("Could not parse line in read_file"))
         .collect()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_read_file() {
+        assert_eq!(
+            read_file("tests/read-file".to_string()),
+            vec!["69".to_string(), "420".to_string()]
+        );
+    }
+}

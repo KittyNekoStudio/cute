@@ -69,7 +69,7 @@ pub fn parse_expressions(parser: &mut Parser) -> Vec<Expression> {
         } else if token.kind() == &TokenKind::EOF {
             parser.consume(1);
         }
-        println!("{}", parser.loc);
+        //println!("{}", parser.loc);
     }
     exprs
 }
@@ -88,7 +88,7 @@ mod tests {
             parse_expressions(&mut parser),
             vec![Expression::Number(Number(69))]
         );
-        let mut parser = Parser::new(vec!["400".to_string(), "+".to_string(), "20".to_string()]);
+        let mut parser = Parser::new(vec!["400 + 20".to_string()]);
         assert_eq!(
             parse_expressions(&mut parser),
             vec![Expression::Add(Box::new(Add::new(

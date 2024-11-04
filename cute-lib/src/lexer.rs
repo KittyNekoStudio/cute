@@ -149,6 +149,26 @@ mod tests {
         );
     }
     #[test]
+    fn lex_token_eol() {
+        assert_eq!(
+            Token::new("EOL"),
+            Token {
+                kind: TokenKind::EOL,
+                value: "EOL".to_string()
+            }
+        );
+    }
+    #[test]
+    fn lex_token_eof() {
+        assert_eq!(
+            Token::new("EOF"),
+            Token {
+                kind: TokenKind::EOF,
+                value: "EOF".to_string()
+            }
+        );
+    }
+    #[test]
     fn check_parse_token() {
         assert_eq!(parse_token("+"), ("+", ""));
         assert_eq!(parse_token("30"), ("30", ""));
