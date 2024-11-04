@@ -1,4 +1,5 @@
-pub mod utils;
-mod lexer;
-mod parser;
 mod ast;
+pub mod file;
+mod lexer;
+pub mod parser;
+pub mod utils;

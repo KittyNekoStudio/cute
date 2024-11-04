@@ -30,7 +30,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn add_new() {
+    fn new_add() {
         assert_eq!(
             Add::new(
                 Expression::Number(Number(400)),
