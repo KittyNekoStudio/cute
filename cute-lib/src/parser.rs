@@ -5,7 +5,7 @@ use crate::lexer::{parse_tokens, Token, TokenKind};
 #[derive(Debug, PartialEq, Clone)]
 /// Parser
 /// Holds a vector of tokens and keeps track of where in the vector it's at.
-struct Parser {
+pub struct Parser {
     tokens: Vec<Token>,
     loc: usize,
 }
@@ -19,10 +19,10 @@ impl Parser {
         }
     }
     /// Removes from loc n number of times.
-    pub fn consume(&mut self, times_consume: usize) {
-        for _ in 0..times_consume {
-            self.tokens.remove(self.loc);
-        }
+    pub fn consume(&mut self, index: usize) -> Token {
+        self.loc += index;
+        // TODO! remove clone
+        self.tokens[index - 1].clone()
     }
     /// Looks ahead of loc + an offset.
     pub fn peek(&self, offset: usize) -> Option<&Token> {
@@ -46,27 +46,30 @@ fn parse_expression(token: &Token) -> Option<Expression> {
 
 /// Loops through all the tokens the parser holds.
 /// Returns a vector of expressions.
-fn parse_expressions(parser: &mut Parser) -> Vec<Expression> {
+pub fn parse_expressions(parser: &mut Parser) -> Vec<Expression> {
     let mut exprs = Vec::new();
 
     loop {
-        if parser.tokens.is_empty() {
+        if parser.loc >= parser.tokens.len() {
             break;
         }
+
         let token = &parser.tokens[parser.loc];
         if parser.peek(1).is_some() && parser.peek(1).unwrap().kind() == &TokenKind::Plus {
             let lhs = parse_expression(&token).expect("Failed in parse_expression");
-            let rhs = parse_expression(&parser.tokens[parser.loc + 2])
-                .expect("Failed in parse_expression");
+            let rhs = parse_expression(&parser.consume(3)).expect("Failed in parse_expression");
             exprs.push(Expression::Add(Box::new(Add::new(lhs, rhs))));
-            parser.consume(3);
         } else if token.kind() == &TokenKind::Number {
             exprs.push(Expression::Number(Number(
                 token.value().parse::<u64>().expect("Failed parsing number"),
             )));
             parser.consume(1);
+        } else if token.kind() == &TokenKind::EOL {
+            parser.consume(1);
+        } else if token.kind() == &TokenKind::EOF {
+            parser.consume(1);
         }
-        parser.loc += 1;
+        println!("{}", parser.loc);
     }
     exprs
 }
@@ -80,16 +83,12 @@ mod tests {
     }
     #[test]
     fn check_parse_expressions() {
-        let mut parser = Parser::new(vec!["69 ".to_string()]);
+        let mut parser = Parser::new(vec!["69".to_string()]);
         assert_eq!(
             parse_expressions(&mut parser),
             vec![Expression::Number(Number(69))]
         );
-        let mut parser = Parser::new(vec![
-            "400 ".to_string(),
-            "+ ".to_string(),
-            "20 ".to_string(),
-        ]);
+        let mut parser = Parser::new(vec!["400".to_string(), "+".to_string(), "20".to_string()]);
         assert_eq!(
             parse_expressions(&mut parser),
             vec![Expression::Add(Box::new(Add::new(
