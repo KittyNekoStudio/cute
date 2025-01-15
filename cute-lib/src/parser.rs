@@ -54,6 +54,8 @@ pub fn parse_expressions(parser: &mut Parser) -> Vec<Expression> {
             break;
         }
 
+        // TODO! we enter an infinite loop when we add multiple times. eg.
+        // 3 + 2 + 10
         let token = &parser.tokens[parser.loc];
         if parser.peek(1).is_some() && parser.peek(1).unwrap().kind() == &TokenKind::Plus {
             let lhs = parse_expression(&token).expect("Failed in parse_expression");

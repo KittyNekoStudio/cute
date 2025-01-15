@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 /// Expression
 /// All the different expressions cute supports.
 pub enum Expression {
@@ -6,12 +6,12 @@ pub enum Expression {
     Add(Box<Add>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 /// Number
 /// An unsigned 64 bit number.
 pub struct Number(pub u64);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 /// Add
 /// An expression that adds two expressions together.
 pub struct Add {

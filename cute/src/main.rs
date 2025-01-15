@@ -2,6 +2,7 @@ use cute_lib::utils::remove_file_extension;
 use cute_lib::file::read_file;
 use cute_lib::parser::*;
 use std::env;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let path: String = match args[1].split(".").collect::<Vec<&str>>()[1] {
